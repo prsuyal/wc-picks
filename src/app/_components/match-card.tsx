@@ -46,7 +46,6 @@ function PointsBadge({
   if (points === null)
     return <span className="invisible h-5 w-16 shrink-0" aria-hidden />;
 
-  const raw = points / multiplier;
   const label = `${points % 1 === 0 ? points : points.toFixed(1)} pts`;
 
   if (points === 0)

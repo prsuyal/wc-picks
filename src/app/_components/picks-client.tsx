@@ -16,9 +16,8 @@ function localDateStr(date: Date): string {
 }
 
 function dateLabel(dateStr: string): string {
-  const [y, m, d] = dateStr.split("-").map(Number);
-  // Construct at local noon to avoid DST/midnight boundary issues
-  const date = new Date(y!, m! - 1, d!, 12, 0, 0);
+  // T12:00:00 forces local time parse (date-only strings parse as UTC)
+  const date = new Date(dateStr + "T12:00:00");
   if (isToday(date)) return "today";
   if (isYesterday(date)) return "yesterday";
   return format(date, "EEEE, MMMM d").toLowerCase();

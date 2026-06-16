@@ -20,7 +20,7 @@ export default function Icon() {
           display: "flex",
         }}
       >
-        <img src={base64} width={64} height={64} style={{ objectFit: "cover" }} />
+        <img src={base64} width={64} height={64} style={{ objectFit: "cover" }} alt="" />
       </div>
     ),
     { ...size },
