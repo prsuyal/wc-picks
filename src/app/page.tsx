@@ -20,10 +20,6 @@ export default async function Home() {
         className="object-cover object-top opacity-70"
         priority
       />
-      <div className="relative flex flex-col items-center gap-2 text-center">
-        <h1 className="text-3xl font-bold">wc picks</h1>
-        <p className="text-sm text-muted-foreground">world cup 2026</p>
-      </div>
       <form
         className="relative"
         action={async () => {

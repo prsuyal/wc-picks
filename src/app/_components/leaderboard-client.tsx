@@ -1,6 +1,9 @@
 "use client";
 
+import { useMemo, useState } from "react";
 import Link from "next/link";
+import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
+import { format } from "date-fns";
 import { api } from "~/trpc/react";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import {
@@ -13,6 +16,16 @@ import {
 } from "~/components/ui/table";
 import { ProgressChart } from "./progress-chart";
 
+function dayNumber(dateStr: string): number {
+  const start = new Date("2026-06-11T12:00:00");
+  const date = new Date(dateStr + "T12:00:00");
+  return Math.round((date.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+}
+
+function formatPts(pts: number): string {
+  return pts % 1 === 0 ? pts.toString() : pts.toFixed(1);
+}
+
 export function LeaderboardClient({ userId }: { userId: string }) {
   const { data: standings = [] } = api.leaderboard.getStandings.useQuery(
     undefined,
@@ -23,20 +36,108 @@ export function LeaderboardClient({ userId }: { userId: string }) {
     { refetchInterval: 60_000 },
   );
 
+  const [dayIndex, setDayIndex] = useState<number | null>(null);
+
+  // Full day range from tournament start to today
+  const allDays = useMemo(() => {
+    const start = new Date("2026-06-11T12:00:00");
+    const today = new Date();
+    const result: string[] = [];
+    const d = new Date(start);
+    while (d <= today) {
+      result.push(format(d, "yyyy-MM-dd"));
+      d.setDate(d.getDate() + 1);
+    }
+    return result;
+  }, []);
+
+  // Expand progress series to cover all days, carrying forward last known total
+  const fullSeries = useMemo(() => {
+    if (!progress) return null;
+    return progress.series.map((s) => {
+      const dayMap = new Map(s.data.map((d) => [d.day, d.points]));
+      let last = 0;
+      const data = allDays.map((day) => {
+        if (dayMap.has(day)) last = dayMap.get(day)!;
+        return { day, points: last };
+      });
+      return { ...s, data };
+    });
+  }, [progress, allDays]);
+
+  const selectedIndex = dayIndex ?? allDays.length - 1;
+  const selectedDay = allDays[selectedIndex];
+
+  // Build a lookup of id → { image } from standings
+  const infoById = useMemo(() => {
+    const map = new Map<string, { image: string | null; email: string | null }>();
+    for (const s of standings) map.set(s.id, { image: s.image, email: s.email });
+    return map;
+  }, [standings]);
+
+  // Derive per-day standings from full series
+  const dayStandings = useMemo(() => {
+    if (!fullSeries) return null;
+    return fullSeries
+      .map((s) => ({
+        id: s.id,
+        name: s.name,
+        image: infoById.get(s.id)?.image ?? null,
+        pts: s.data[selectedIndex]?.points ?? 0,
+      }))
+      .sort((a, b) => b.pts - a.pts);
+  }, [fullSeries, selectedIndex, infoById]);
+
+  const rows = dayStandings ?? standings.map((s) => ({
+    id: s.id,
+    name: s.name,
+    image: s.image,
+    pts: s.totalPoints,
+  }));
+
+  const canGoPrev = selectedIndex > 0;
+  const canGoNext = selectedIndex < allDays.length - 1;
+
   return (
     <>
+      {/* Day navigator */}
+      {allDays.length > 0 && selectedDay && (
+        <div className="mb-4 flex items-center justify-between">
+          <button
+            onClick={() => setDayIndex(selectedIndex - 1)}
+            disabled={!canGoPrev}
+            className="p-1 text-muted-foreground hover:text-foreground disabled:opacity-20 transition-opacity"
+            aria-label="Previous day"
+          >
+            <ChevronLeftIcon className="size-5" />
+          </button>
+          <span className="text-sm font-medium tabular-nums">
+            day {dayNumber(selectedDay)}{" "}
+            <span className="text-muted-foreground font-normal">
+              · {format(new Date(selectedDay + "T12:00:00"), "MMM d")}
+            </span>
+          </span>
+          <button
+            onClick={() => setDayIndex(canGoNext ? selectedIndex + 1 : null)}
+            disabled={!canGoNext}
+            className="p-1 text-muted-foreground hover:text-foreground disabled:opacity-20 transition-opacity"
+            aria-label="Next day"
+          >
+            <ChevronRightIcon className="size-5" />
+          </button>
+        </div>
+      )}
+
       <Table>
         <TableHeader>
           <TableRow>
             <TableHead className="w-10">#</TableHead>
             <TableHead>player</TableHead>
             <TableHead className="w-16 text-center">pts</TableHead>
-            <TableHead className="w-16 text-center">picks</TableHead>
-            <TableHead className="w-20 text-center">per pick</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {standings.map((player, i) => {
+          {rows.map((player, i) => {
             const initials = player.name
               ?.split(" ")
               .map((n) => n[0])
@@ -78,25 +179,15 @@ export function LeaderboardClient({ userId }: { userId: string }) {
                   </Link>
                 </TableCell>
                 <TableCell className="text-center font-semibold tabular-nums">
-                  {player.totalPoints % 1 === 0
-                    ? player.totalPoints
-                    : player.totalPoints.toFixed(1)}
-                </TableCell>
-                <TableCell className="text-center tabular-nums text-muted-foreground">
-                  {player.predictionsCount}
-                </TableCell>
-                <TableCell className="text-center tabular-nums text-muted-foreground">
-                  {player.pointsPerGame !== null
-                    ? player.pointsPerGame.toFixed(2)
-                    : "—"}
+                  {formatPts(player.pts)}
                 </TableCell>
               </TableRow>
             );
           })}
-          {standings.length === 0 && (
+          {rows.length === 0 && (
             <TableRow>
               <TableCell
-                colSpan={5}
+                colSpan={3}
                 className="py-8 text-center text-sm text-muted-foreground"
               >
                 No picks yet.
@@ -106,12 +197,12 @@ export function LeaderboardClient({ userId }: { userId: string }) {
         </TableBody>
       </Table>
 
-      {progress && (
+      {fullSeries && (
         <div className="mt-12">
           <h2 className="text-muted-foreground mb-4 text-sm font-medium tracking-widest uppercase">
             points over time
           </h2>
-          <ProgressChart days={progress.days} series={progress.series} />
+          <ProgressChart days={allDays} series={fullSeries} />
         </div>
       )}
     </>
