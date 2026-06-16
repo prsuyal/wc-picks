@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { api } from "~/trpc/react";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import {
@@ -53,7 +54,10 @@ export function LeaderboardClient({ userId }: { userId: string }) {
                   {i + 1}
                 </TableCell>
                 <TableCell>
-                  <div className="flex items-center gap-2">
+                  <Link
+                    href={isMe ? "/picks" : `/player/${player.id}`}
+                    className="flex items-center gap-2 hover:opacity-70 transition-opacity"
+                  >
                     <Avatar className="h-6 w-6">
                       <AvatarImage
                         src={player.image ?? undefined}
@@ -71,7 +75,7 @@ export function LeaderboardClient({ userId }: { userId: string }) {
                         </span>
                       )}
                     </span>
-                  </div>
+                  </Link>
                 </TableCell>
                 <TableCell className="text-left font-semibold tabular-nums">
                   {player.totalPoints % 1 === 0
