@@ -41,7 +41,7 @@ function formatPts(pts: number): string {
 
 function computePts(matches: MatchWithPrediction[]): number | null {
   const finished = matches.filter(
-    (m) => m.homeScore !== null && m.awayScore !== null,
+    (m) => m.status === "FINISHED" && m.homeScore !== null && m.awayScore !== null,
   );
   if (finished.length === 0) return null;
   return finished.reduce((sum, m) => {
