@@ -84,6 +84,7 @@ const FLAGS: Record<string, string> = {
   "Tunisia": "🇹🇳",
   "Mali": "🇲🇱",
   "DR Congo": "🇨🇩",
+  "Congo DR": "🇨🇩",
   "Zambia": "🇿🇲",
   "Tanzania": "🇹🇿",
   "Mozambique": "🇲🇿",

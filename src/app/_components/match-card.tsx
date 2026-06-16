@@ -70,7 +70,11 @@ export function MatchCard({ match }: { match: MatchWithPrediction }) {
     existing?.awayScorePred?.toString() ?? "",
   );
   const submittedScoreKey = useRef<string | null>(null);
+  const [homeFocused, setHomeFocused] = useState(false);
+  const [awayFocused, setAwayFocused] = useState(false);
+  const [saved, setSaved] = useState(false);
 
+  const savedTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const utils = api.useUtils();
   const upsert = api.prediction.upsert.useMutation({
     onSuccess: async () => {
@@ -107,6 +111,9 @@ export function MatchCard({ match }: { match: MatchWithPrediction }) {
 
     const timeout = setTimeout(() => {
       submittedScoreKey.current = scoreKey;
+      if (savedTimer.current) clearTimeout(savedTimer.current);
+      setSaved(true);
+      savedTimer.current = setTimeout(() => setSaved(false), 1500);
       upsert.mutate({ matchId: match.id, homeScorePred: h, awayScorePred: a });
     }, 350);
 
@@ -122,14 +129,14 @@ export function MatchCard({ match }: { match: MatchWithPrediction }) {
   ]);
 
   return (
-    <div className="grid items-center gap-3 rounded-lg border px-4 py-3 sm:grid-cols-[minmax(0,1fr)_auto]">
+    <div className="grid items-center gap-2 rounded-lg border px-4 py-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:gap-3">
       <div className="min-w-0 flex-1">
-        <div className="flex min-w-0 items-center gap-2">
+        <div className="flex min-w-0 items-center justify-center gap-2 sm:justify-start">
           <TeamName name={match.homeTeam} />
           <span className="text-muted-foreground shrink-0 text-xs">vs</span>
           <TeamName name={match.awayTeam} />
         </div>
-        <div className="text-muted-foreground mt-0.5 flex min-w-0 items-center gap-2 text-xs">
+        <div className="text-muted-foreground mt-0.5 flex min-w-0 items-center justify-center gap-2 text-xs sm:justify-start">
           <span className={`tabular-nums${isLateKickoff ? " text-orange-500" : ""}`}>
             {format(new Date(match.kickoffAt), "MMM d, h:mm a")}
           </span>
@@ -147,7 +154,7 @@ export function MatchCard({ match }: { match: MatchWithPrediction }) {
         </div>
       </div>
 
-      <div className="grid shrink-0 items-center justify-self-end">
+      <div className="grid shrink-0 items-center justify-self-center sm:justify-self-end">
         {isLocked ? (
           <div className="grid grid-cols-[4rem_4rem_4rem] items-center gap-2">
             {existing ? (
@@ -182,26 +189,37 @@ export function MatchCard({ match }: { match: MatchWithPrediction }) {
             )}
           </div>
         ) : (
-          <div className="grid grid-cols-[3rem_0.5rem_3rem] items-center gap-2">
-            <Input
-              type="text"
-              inputMode="numeric"
-              pattern="[0-9]*"
-              value={home}
-              onChange={(e) => setHome(cleanScoreInput(e.target.value))}
-              className="h-8 w-12 text-center tabular-nums"
-              placeholder="-"
-            />
-            <span className="text-muted-foreground text-xs">–</span>
-            <Input
-              type="text"
-              inputMode="numeric"
-              pattern="[0-9]*"
-              value={away}
-              onChange={(e) => setAway(cleanScoreInput(e.target.value))}
-              className="h-8 w-12 text-center tabular-nums"
-              placeholder="-"
-            />
+          <div className="flex items-center gap-3">
+            <span
+              className={`text-muted-foreground text-xs font-medium tracking-widest uppercase transition-opacity duration-500 ${saved ? "opacity-100" : "opacity-0"}`}
+            >
+              saved
+            </span>
+            <div className="grid grid-cols-[3rem_0.5rem_3rem] items-center gap-2">
+              <Input
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                value={home}
+                onChange={(e) => setHome(cleanScoreInput(e.target.value))}
+                onFocus={() => setHomeFocused(true)}
+                onBlur={() => setHomeFocused(false)}
+                className="h-8 w-12 text-center tabular-nums"
+                placeholder={homeFocused ? "" : "-"}
+              />
+              <span className="text-muted-foreground text-xs">–</span>
+              <Input
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                value={away}
+                onChange={(e) => setAway(cleanScoreInput(e.target.value))}
+                onFocus={() => setAwayFocused(true)}
+                onBlur={() => setAwayFocused(false)}
+                className="h-8 w-12 text-center tabular-nums"
+                placeholder={awayFocused ? "" : "-"}
+              />
+            </div>
           </div>
         )}
       </div>

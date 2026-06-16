@@ -30,7 +30,7 @@ export const leaderboardRouter = createTRPCRouter({
         image: user.image,
         email: user.email,
         totalPoints,
-        predictionsCount: user.predictions.length,
+        predictionsCount: predictionsWithPoints,
         pointsPerGame:
           predictionsWithPoints > 0
             ? totalPoints / predictionsWithPoints
