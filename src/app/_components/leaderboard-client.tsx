@@ -30,9 +30,9 @@ export function LeaderboardClient({ userId }: { userId: string }) {
           <TableRow>
             <TableHead className="w-10">#</TableHead>
             <TableHead>player</TableHead>
-            <TableHead className="w-16 text-left">pts</TableHead>
-            <TableHead className="w-16 text-left">picks</TableHead>
-            <TableHead className="w-20 text-left">per pick</TableHead>
+            <TableHead className="w-16 text-center">pts</TableHead>
+            <TableHead className="w-16 text-center">picks</TableHead>
+            <TableHead className="w-20 text-center">per pick</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -77,15 +77,15 @@ export function LeaderboardClient({ userId }: { userId: string }) {
                     </span>
                   </Link>
                 </TableCell>
-                <TableCell className="text-left font-semibold tabular-nums">
+                <TableCell className="text-center font-semibold tabular-nums">
                   {player.totalPoints % 1 === 0
                     ? player.totalPoints
                     : player.totalPoints.toFixed(1)}
                 </TableCell>
-                <TableCell className="text-left tabular-nums text-muted-foreground">
+                <TableCell className="text-center tabular-nums text-muted-foreground">
                   {player.predictionsCount}
                 </TableCell>
-                <TableCell className="text-left tabular-nums text-muted-foreground">
+                <TableCell className="text-center tabular-nums text-muted-foreground">
                   {player.pointsPerGame !== null
                     ? player.pointsPerGame.toFixed(2)
                     : "—"}
