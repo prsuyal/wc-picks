@@ -53,4 +53,17 @@ export const authConfig = {
       },
     }),
   },
+  events: {
+    async signIn({ user, profile }) {
+      if (!user.id) return;
+      const name = profile?.name ?? null;
+      const image = (profile?.picture as string | undefined) ?? null;
+      if (name ?? image) {
+        await db.user.update({
+          where: { id: user.id },
+          data: { name, image },
+        });
+      }
+    },
+  },
 } satisfies NextAuthConfig;
