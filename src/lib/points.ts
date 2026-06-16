@@ -2,7 +2,7 @@ import type { Match, Prediction, Round } from "../../generated/prisma";
 
 const MULTIPLIERS = {
   GROUP: 0.5,
-  ROUND_OF_32: 1.5,
+  ROUND_OF_32: 1,
   ROUND_OF_16: 2,
   QUARTER_FINAL: 2.5,
   SEMI_FINAL: 3.5,

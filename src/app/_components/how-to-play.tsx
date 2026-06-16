@@ -67,7 +67,7 @@ export function HowToPlay() {
               </div>
               <div className="flex items-center justify-between px-3 py-1.5 sm:py-2">
                 <span className="text-muted-foreground">round of 32</span>
-                <span className="font-medium tabular-nums">×1.5</span>
+                <span className="font-medium tabular-nums">×1.0</span>
               </div>
               <div className="flex items-center justify-between px-3 py-1.5 sm:py-2">
                 <span className="text-muted-foreground">round of 16</span>
