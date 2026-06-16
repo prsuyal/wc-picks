@@ -9,7 +9,6 @@ import { Nav } from "./_components/nav";
 export const metadata: Metadata = {
   title: "wc picks",
   description: "World Cup 2026 prediction game",
-  icons: [{ rel: "icon", url: "/favicon.ico" }],
 };
 
 const geist = Geist({
