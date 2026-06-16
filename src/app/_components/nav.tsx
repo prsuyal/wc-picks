@@ -9,6 +9,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
+import { HowToPlay } from "./how-to-play";
 
 export async function Nav() {
   const session = await auth();
@@ -34,6 +35,7 @@ export async function Nav() {
           >
             leaderboard
           </Link>
+          <HowToPlay />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="h-8 w-8 rounded-full p-0">
