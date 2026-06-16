@@ -109,19 +109,19 @@ export function PicksClient() {
     const isMidnightGame = (m: MatchWithPrediction) =>
       new Date(m.kickoffAt).getHours() < 6;
 
-    // "your picks" = already started OR tomorrow's sub-6am games (late-night picks)
+    // "your picks" = today or earlier OR tomorrow's sub-6am games (late-night picks)
     const past = matches.filter((m) => {
-      const kickoff = new Date(m.kickoffAt);
+      const dateStr = localDateStr(new Date(m.kickoffAt));
       return (
-        kickoff <= now ||
-        (localDateStr(kickoff) === tomorrowStr && isMidnightGame(m))
+        dateStr <= today ||
+        (dateStr === tomorrowStr && isMidnightGame(m))
       );
     });
     const upcoming = matches.filter((m) => {
-      const kickoff = new Date(m.kickoffAt);
+      const dateStr = localDateStr(new Date(m.kickoffAt));
       return (
-        kickoff > now &&
-        !(localDateStr(kickoff) === tomorrowStr && isMidnightGame(m))
+        dateStr > today &&
+        !(dateStr === tomorrowStr && isMidnightGame(m))
       );
     });
 
