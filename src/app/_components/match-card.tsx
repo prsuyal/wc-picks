@@ -86,7 +86,7 @@ export function MatchCard({ match }: { match: MatchWithPrediction }) {
     match.status !== "SCHEDULED" || match.kickoffAt <= new Date();
   const isLive = isMatchLive(match);
   const multiplier = getMultiplier(match.round);
-  const isLateKickoff = new Date(match.kickoffAt).getHours() < 6;
+  const isLateKickoff = !isLocked && new Date(match.kickoffAt).getHours() < 6;
 
   const points =
     match.homeScore !== null && match.awayScore !== null

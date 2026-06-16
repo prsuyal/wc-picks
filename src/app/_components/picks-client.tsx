@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { format, isToday, isYesterday } from "date-fns";
+import { format, isToday, isTomorrow, isYesterday } from "date-fns";
 import { api } from "~/trpc/react";
 import { calculatePoints } from "~/lib/points";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
@@ -20,6 +20,7 @@ function dateLabel(dateStr: string): string {
   const date = new Date(dateStr + "T12:00:00");
   if (isToday(date)) return "today";
   if (isYesterday(date)) return "yesterday";
+  if (isTomorrow(date)) return "tomorrow";
   return format(date, "EEEE, MMMM d").toLowerCase();
 }
 
@@ -100,12 +101,29 @@ export function PicksClient() {
   const today = localDateStr(new Date());
 
   const { yourPicksGroups, upcomingGroups, totalPts } = useMemo(() => {
-    const past = matches.filter(
-      (m) => localDateStr(new Date(m.kickoffAt)) <= today,
-    );
-    const upcoming = matches.filter(
-      (m) => localDateStr(new Date(m.kickoffAt)) > today,
-    );
+    const now = new Date();
+    const tomorrowDate = new Date(now);
+    tomorrowDate.setDate(tomorrowDate.getDate() + 1);
+    const tomorrowStr = localDateStr(tomorrowDate);
+
+    const isMidnightGame = (m: MatchWithPrediction) =>
+      new Date(m.kickoffAt).getHours() < 6;
+
+    // "your picks" = already started OR tomorrow's sub-6am games (late-night picks)
+    const past = matches.filter((m) => {
+      const kickoff = new Date(m.kickoffAt);
+      return (
+        kickoff <= now ||
+        (localDateStr(kickoff) === tomorrowStr && isMidnightGame(m))
+      );
+    });
+    const upcoming = matches.filter((m) => {
+      const kickoff = new Date(m.kickoffAt);
+      return (
+        kickoff > now &&
+        !(localDateStr(kickoff) === tomorrowStr && isMidnightGame(m))
+      );
+    });
 
     const pastGroups = groupByDate(past).sort((a, b) =>
       b.dateStr.localeCompare(a.dateStr),
