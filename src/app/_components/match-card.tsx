@@ -189,9 +189,9 @@ export function MatchCard({ match }: { match: MatchWithPrediction }) {
             )}
           </div>
         ) : (
-          <div className="flex items-center gap-3">
+          <div className="relative flex items-center justify-center">
             <span
-              className={`text-muted-foreground text-xs font-medium tracking-widest uppercase transition-opacity duration-500 ${saved ? "opacity-100" : "opacity-0"}`}
+              className={`text-muted-foreground absolute right-full mr-2 text-xs font-medium tracking-widest uppercase transition-opacity duration-500 ${saved ? "opacity-100" : "opacity-0"}`}
             >
               saved
             </span>
