@@ -5,6 +5,10 @@ import Link from "next/link";
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 import { format } from "date-fns";
 import { api } from "~/trpc/react";
+import {
+  getLeaderboardDayNumber,
+  getLeaderboardDaysThrough,
+} from "~/lib/leaderboard-days";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import {
   Table,
@@ -15,12 +19,6 @@ import {
   TableRow,
 } from "~/components/ui/table";
 import { ProgressChart } from "./progress-chart";
-
-function dayNumber(dateStr: string): number {
-  const start = new Date("2026-06-11T12:00:00");
-  const date = new Date(dateStr + "T12:00:00");
-  return Math.round((date.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
-}
 
 function formatPts(pts: number): string {
   return pts % 1 === 0 ? pts.toString() : pts.toFixed(1);
@@ -40,15 +38,7 @@ export function LeaderboardClient({ userId }: { userId: string }) {
 
   // Full day range from tournament start to today
   const allDays = useMemo(() => {
-    const start = new Date("2026-06-11T12:00:00");
-    const today = new Date();
-    const result: string[] = [];
-    const d = new Date(start);
-    while (d <= today) {
-      result.push(format(d, "yyyy-MM-dd"));
-      d.setDate(d.getDate() + 1);
-    }
-    return result;
+    return getLeaderboardDaysThrough();
   }, []);
 
   // Expand progress series to cover all days, carrying forward last known total
@@ -70,8 +60,12 @@ export function LeaderboardClient({ userId }: { userId: string }) {
 
   // Build a lookup of id → { image } from standings
   const infoById = useMemo(() => {
-    const map = new Map<string, { image: string | null; email: string | null }>();
-    for (const s of standings) map.set(s.id, { image: s.image, email: s.email });
+    const map = new Map<
+      string,
+      { image: string | null; email: string | null }
+    >();
+    for (const s of standings)
+      map.set(s.id, { image: s.image, email: s.email });
     return map;
   }, [standings]);
 
@@ -88,12 +82,14 @@ export function LeaderboardClient({ userId }: { userId: string }) {
       .sort((a, b) => b.pts - a.pts);
   }, [fullSeries, selectedIndex, infoById]);
 
-  const rows = dayStandings ?? standings.map((s) => ({
-    id: s.id,
-    name: s.name,
-    image: s.image,
-    pts: s.totalPoints,
-  }));
+  const rows =
+    dayStandings ??
+    standings.map((s) => ({
+      id: s.id,
+      name: s.name,
+      image: s.image,
+      pts: s.totalPoints,
+    }));
 
   const canGoPrev = selectedIndex > 0;
   const canGoNext = selectedIndex < allDays.length - 1;
@@ -106,13 +102,13 @@ export function LeaderboardClient({ userId }: { userId: string }) {
           <button
             onClick={() => setDayIndex(selectedIndex - 1)}
             disabled={!canGoPrev}
-            className="p-1 text-muted-foreground hover:text-foreground disabled:opacity-20 transition-opacity"
+            className="text-muted-foreground hover:text-foreground p-1 transition-opacity disabled:opacity-20"
             aria-label="Previous day"
           >
             <ChevronLeftIcon className="size-5" />
           </button>
           <span className="text-sm font-medium tabular-nums">
-            day {dayNumber(selectedDay)}{" "}
+            day {getLeaderboardDayNumber(selectedDay)}{" "}
             <span className="text-muted-foreground font-normal">
               · {format(new Date(selectedDay + "T12:00:00"), "MMM d")}
             </span>
@@ -120,7 +116,7 @@ export function LeaderboardClient({ userId }: { userId: string }) {
           <button
             onClick={() => setDayIndex(canGoNext ? selectedIndex + 1 : null)}
             disabled={!canGoNext}
-            className="p-1 text-muted-foreground hover:text-foreground disabled:opacity-20 transition-opacity"
+            className="text-muted-foreground hover:text-foreground p-1 transition-opacity disabled:opacity-20"
             aria-label="Next day"
           >
             <ChevronRightIcon className="size-5" />
@@ -151,13 +147,13 @@ export function LeaderboardClient({ userId }: { userId: string }) {
                 key={player.id}
                 className={isMe ? "bg-muted/50" : undefined}
               >
-                <TableCell className="text-sm text-muted-foreground">
+                <TableCell className="text-muted-foreground text-sm">
                   {i + 1}
                 </TableCell>
                 <TableCell>
                   <Link
                     href={isMe ? "/picks" : `/player/${player.id}`}
-                    className="flex items-center gap-2 hover:opacity-70 transition-opacity"
+                    className="flex items-center gap-2 transition-opacity hover:opacity-70"
                   >
                     <Avatar className="h-6 w-6">
                       <AvatarImage
@@ -171,7 +167,7 @@ export function LeaderboardClient({ userId }: { userId: string }) {
                     <span className="text-sm">
                       {player.name}
                       {isMe && (
-                        <span className="ml-1 text-xs text-muted-foreground">
+                        <span className="text-muted-foreground ml-1 text-xs">
                           (you)
                         </span>
                       )}
@@ -188,7 +184,7 @@ export function LeaderboardClient({ userId }: { userId: string }) {
             <TableRow>
               <TableCell
                 colSpan={3}
-                className="py-8 text-center text-sm text-muted-foreground"
+                className="text-muted-foreground py-8 text-center text-sm"
               >
                 No picks yet.
               </TableCell>

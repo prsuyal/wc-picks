@@ -1,6 +1,6 @@
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { calculatePoints } from "~/lib/points";
-import { format } from "date-fns";
+import { getLeaderboardDay } from "~/lib/leaderboard-days";
 
 export const leaderboardRouter = createTRPCRouter({
   getStandings: protectedProcedure.query(async ({ ctx }) => {
@@ -48,7 +48,16 @@ export const leaderboardRouter = createTRPCRouter({
 
     const predictions = await ctx.db.prediction.findMany({
       where: { match: { status: "FINISHED" } },
-      include: { match: { select: { kickoffAt: true, homeScore: true, awayScore: true, round: true } } },
+      include: {
+        match: {
+          select: {
+            kickoffAt: true,
+            homeScore: true,
+            awayScore: true,
+            round: true,
+          },
+        },
+      },
     });
 
     // Points per user per day
@@ -61,7 +70,7 @@ export const leaderboardRouter = createTRPCRouter({
     for (const pred of predictions) {
       const pts = calculatePoints(pred.match, pred);
       if (pts === null) continue;
-      const day = format(new Date(pred.match.kickoffAt), "yyyy-MM-dd");
+      const day = getLeaderboardDay(pred.match.kickoffAt);
       allDays.add(day);
       const userMap = pointsByUserDay.get(pred.userId);
       if (userMap) userMap.set(day, (userMap.get(day) ?? 0) + pts);
