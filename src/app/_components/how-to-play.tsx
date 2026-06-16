@@ -29,7 +29,7 @@ export function HowToPlay() {
           <div className="space-y-0.5 sm:space-y-1">
             <p className="font-medium text-sm">making picks</p>
             <p className="text-muted-foreground leading-relaxed">
-              predict the scoreline for each match before it kicks off. once a match starts, your pick locks and you can't change it.
+              predict the scoreline for each match before it kicks off. once a match starts, your pick locks and you cannot change it.
             </p>
           </div>
 
@@ -91,7 +91,7 @@ export function HowToPlay() {
           <div className="space-y-0.5 sm:space-y-1">
             <p className="font-medium text-sm">seeing other picks</p>
             <p className="text-muted-foreground leading-relaxed">
-              you can't see what anyone else picked until the match kicks off. once it starts, everyone's picks are visible.
+              you cannot see what anyone else picked until the match kicks off. once it starts, everyone&apos;s picks are visible.
             </p>
           </div>
         </div>

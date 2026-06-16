@@ -38,7 +38,7 @@ function TeamName({ name }: { name: string }) {
 
 function PointsBadge({
   points,
-  multiplier,
+  multiplier: _multiplier,
 }: {
   points: number | null;
   multiplier: number;
