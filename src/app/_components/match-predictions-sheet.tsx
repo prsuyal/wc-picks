@@ -3,7 +3,7 @@
 import { format } from "date-fns";
 import { api } from "~/trpc/react";
 import type { Match, Prediction } from "../../../generated/prisma";
-import { calculatePoints, getMultiplier } from "~/lib/points";
+import { getMultiplier } from "~/lib/points";
 import { getFlag } from "~/lib/team-flags";
 import {
   Sheet,
