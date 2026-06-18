@@ -11,6 +11,7 @@ export function ThemeToggle() {
       onClick={toggle}
       aria-label="Toggle theme"
       className="text-muted-foreground hover:text-foreground flex items-center"
+      suppressHydrationWarning
     >
       {theme === "dark" ? (
         <Sun className="size-4" />
