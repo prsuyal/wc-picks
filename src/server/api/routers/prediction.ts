@@ -66,10 +66,7 @@ export const predictionRouter = createTRPCRouter({
         userImage: p.user.image,
         homeScorePred: p.homeScorePred,
         awayScorePred: p.awayScorePred,
-        points:
-          match.homeScore !== null && match.awayScore !== null
-            ? calculatePoints(match, p)
-            : null,
+        points: match.status === "FINISHED" ? calculatePoints(match, p) : null,
       }));
 
       mapped.sort((a, b) => {

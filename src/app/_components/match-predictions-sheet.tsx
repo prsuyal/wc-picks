@@ -53,7 +53,7 @@ export function MatchPredictionsSheet({
   const multiplier = getMultiplier(match.round);
   const homeFlag = getFlag(match.homeTeam);
   const awayFlag = getFlag(match.awayTeam);
-  const isFinished = match.homeScore !== null && match.awayScore !== null;
+  const isFinished = match.status === "FINISHED";
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
