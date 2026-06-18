@@ -54,11 +54,30 @@ export const predictionRouter = createTRPCRouter({
       if (match.kickoffAt > new Date())
         throw new TRPCError({ code: "FORBIDDEN", message: "Predictions are hidden until kickoff." });
 
-      const predictions = await ctx.db.prediction.findMany({
-        where: { matchId: input.matchId },
-        include: { user: { select: { id: true, name: true, image: true } } },
-        orderBy: { user: { name: "asc" } },
-      });
+      const isFinished = match.status === "FINISHED";
+
+      const [predictions, allPredictions] = await Promise.all([
+        ctx.db.prediction.findMany({
+          where: { matchId: input.matchId },
+          include: { user: { select: { id: true, name: true, image: true } } },
+          orderBy: { user: { name: "asc" } },
+        }),
+        isFinished
+          ? Promise.resolve(null)
+          : ctx.db.prediction.findMany({
+              where: { match: { status: "FINISHED" } },
+              include: { match: true },
+            }),
+      ]);
+
+      // Total leaderboard points per user (for sorting live/unfinished matches)
+      const totalPointsByUser = new Map<string, number>();
+      if (allPredictions) {
+        for (const p of allPredictions) {
+          const pts = calculatePoints(p.match, p) ?? 0;
+          totalPointsByUser.set(p.userId, (totalPointsByUser.get(p.userId) ?? 0) + pts);
+        }
+      }
 
       const mapped = predictions.map((p) => ({
         userId: p.userId,
@@ -66,16 +85,23 @@ export const predictionRouter = createTRPCRouter({
         userImage: p.user.image,
         homeScorePred: p.homeScorePred,
         awayScorePred: p.awayScorePred,
-        points: match.status === "FINISHED" ? calculatePoints(match, p) : null,
+        points: isFinished ? calculatePoints(match, p) : null,
+        leaderboardPoints: totalPointsByUser.get(p.userId) ?? 0,
       }));
 
-      mapped.sort((a, b) => {
-        if (a.points !== null && b.points !== null) {
-          if (b.points !== a.points) return b.points - a.points;
-        } else if (a.points !== null) return -1;
-        else if (b.points !== null) return 1;
-        return (a.userName ?? "").localeCompare(b.userName ?? "");
-      });
+      if (isFinished) {
+        mapped.sort((a, b) => {
+          if (a.points !== null && b.points !== null && b.points !== a.points)
+            return b.points - a.points;
+          return (a.userName ?? "").localeCompare(b.userName ?? "");
+        });
+      } else {
+        mapped.sort(
+          (a, b) =>
+            b.leaderboardPoints - a.leaderboardPoints ||
+            (a.userName ?? "").localeCompare(b.userName ?? ""),
+        );
+      }
 
       return { match, predictions: mapped };
     }),

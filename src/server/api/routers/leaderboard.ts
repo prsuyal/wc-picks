@@ -38,7 +38,11 @@ export const leaderboardRouter = createTRPCRouter({
       };
     });
 
-    return standings.sort((a, b) => b.totalPoints - a.totalPoints);
+    return standings.sort(
+      (a, b) =>
+        b.totalPoints - a.totalPoints ||
+        (a.name ?? "").localeCompare(b.name ?? ""),
+    );
   }),
 
   getDailyProgress: protectedProcedure.query(async ({ ctx }) => {
