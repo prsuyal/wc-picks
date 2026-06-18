@@ -17,7 +17,7 @@ export default async function PlayerPage({
 
   return (
     <main className="mx-auto max-w-2xl px-4 py-8">
-      <PlayerPicksClient userId={userId} />
+      <PlayerPicksClient userId={userId} currentUserId={session.user.id} />
     </main>
   );
 }

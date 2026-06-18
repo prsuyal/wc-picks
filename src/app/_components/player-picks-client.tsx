@@ -53,9 +53,11 @@ function computePts(matches: MatchWithPrediction[]): number | null {
 function DateSection({
   dateStr,
   matches,
+  currentUserId,
 }: {
   dateStr: string;
   matches: MatchWithPrediction[];
+  currentUserId: string;
 }) {
   const pts = computePts(matches);
   return (
@@ -72,7 +74,7 @@ function DateSection({
       </div>
       <div className="space-y-2">
         {matches.map((m) => (
-          <MatchCard key={m.id} match={m} />
+          <MatchCard key={m.id} match={m} currentUserId={currentUserId} />
         ))}
       </div>
     </div>
@@ -91,7 +93,7 @@ function MatchSkeleton() {
   );
 }
 
-export function PlayerPicksClient({ userId }: { userId: string }) {
+export function PlayerPicksClient({ userId, currentUserId }: { userId: string; currentUserId: string }) {
   const { data, isLoading } = api.match.getForUser.useQuery(
     { userId },
     { refetchInterval: 60_000 },
@@ -166,7 +168,7 @@ export function PlayerPicksClient({ userId }: { userId: string }) {
               </p>
             )}
             {groups.map(({ dateStr, matches }) => (
-              <DateSection key={dateStr} dateStr={dateStr} matches={matches} />
+              <DateSection key={dateStr} dateStr={dateStr} matches={matches} currentUserId={currentUserId} />
             ))}
           </>
         )}

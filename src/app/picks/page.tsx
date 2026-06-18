@@ -12,7 +12,7 @@ export default async function PicksPage() {
   return (
     <HydrateClient>
       <main className="mx-auto max-w-4xl px-4 py-8">
-        <PicksClient />
+        <PicksClient currentUserId={session.user.id} />
       </main>
     </HydrateClient>
   );

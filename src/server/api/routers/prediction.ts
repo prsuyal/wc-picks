@@ -46,6 +46,43 @@ export const predictionRouter = createTRPCRouter({
       });
     }),
 
+  getForMatch: protectedProcedure
+    .input(z.object({ matchId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const match = await ctx.db.match.findUnique({ where: { id: input.matchId } });
+      if (!match) throw new TRPCError({ code: "NOT_FOUND" });
+      if (match.kickoffAt > new Date())
+        throw new TRPCError({ code: "FORBIDDEN", message: "Predictions are hidden until kickoff." });
+
+      const predictions = await ctx.db.prediction.findMany({
+        where: { matchId: input.matchId },
+        include: { user: { select: { id: true, name: true, image: true } } },
+        orderBy: { user: { name: "asc" } },
+      });
+
+      const mapped = predictions.map((p) => ({
+        userId: p.userId,
+        userName: p.user.name,
+        userImage: p.user.image,
+        homeScorePred: p.homeScorePred,
+        awayScorePred: p.awayScorePred,
+        points:
+          match.homeScore !== null && match.awayScore !== null
+            ? calculatePoints(match, p)
+            : null,
+      }));
+
+      mapped.sort((a, b) => {
+        if (a.points !== null && b.points !== null) {
+          if (b.points !== a.points) return b.points - a.points;
+        } else if (a.points !== null) return -1;
+        else if (b.points !== null) return 1;
+        return (a.userName ?? "").localeCompare(b.userName ?? "");
+      });
+
+      return { match, predictions: mapped };
+    }),
+
   getMyPredictions: protectedProcedure.query(async ({ ctx }) => {
     const predictions = await ctx.db.prediction.findMany({
       where: { userId: ctx.session.user.id },

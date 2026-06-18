@@ -9,6 +9,7 @@ import { getFlag } from "~/lib/team-flags";
 import { api } from "~/trpc/react";
 import { Badge } from "~/components/ui/badge";
 import { Input } from "~/components/ui/input";
+import { MatchPredictionsSheet } from "./match-predictions-sheet";
 
 type MatchWithPrediction = Match & {
   predictions: Prediction[];
@@ -61,7 +62,7 @@ function PointsBadge({
   );
 }
 
-export function MatchCard({ match }: { match: MatchWithPrediction }) {
+export function MatchCard({ match, currentUserId }: { match: MatchWithPrediction; currentUserId: string }) {
   const existing = match.predictions[0];
   const [home, setHome] = useState<string>(
     existing?.homeScorePred?.toString() ?? "",
@@ -74,6 +75,7 @@ export function MatchCard({ match }: { match: MatchWithPrediction }) {
   const [awayFocused, setAwayFocused] = useState(false);
   const [saved, setSaved] = useState(false);
 
+  const [sheetOpen, setSheetOpen] = useState(false);
   const savedTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const utils = api.useUtils();
   const upsert = api.prediction.upsert.useMutation({
@@ -129,7 +131,19 @@ export function MatchCard({ match }: { match: MatchWithPrediction }) {
   ]);
 
   return (
-    <div className="grid items-center gap-2 rounded-lg border px-4 py-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:gap-3">
+    <>
+      {isLocked && (
+        <MatchPredictionsSheet
+          match={match}
+          open={sheetOpen}
+          onOpenChange={setSheetOpen}
+          currentUserId={currentUserId}
+        />
+      )}
+      <div
+        className={`grid items-center gap-2 rounded-lg border px-4 py-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:gap-3${isLocked ? " cursor-pointer transition-colors hover:bg-muted/40" : ""}`}
+        onClick={isLocked ? () => setSheetOpen(true) : undefined}
+      >
       <div className="min-w-0 flex-1">
         <div className="flex min-w-0 items-center justify-center gap-2 sm:justify-start">
           <TeamName name={match.homeTeam} />
@@ -223,6 +237,7 @@ export function MatchCard({ match }: { match: MatchWithPrediction }) {
           </div>
         )}
       </div>
-    </div>
+      </div>
+    </>
   );
 }

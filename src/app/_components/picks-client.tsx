@@ -54,9 +54,11 @@ function computePts(matches: MatchWithPrediction[]): number | null {
 function DateSection({
   dateStr,
   matches,
+  currentUserId,
 }: {
   dateStr: string;
   matches: MatchWithPrediction[];
+  currentUserId: string;
 }) {
   const pts = computePts(matches);
   return (
@@ -73,7 +75,7 @@ function DateSection({
       </div>
       <div className="space-y-2">
         {matches.map((m) => (
-          <MatchCard key={m.id} match={m} />
+          <MatchCard key={m.id} match={m} currentUserId={currentUserId} />
         ))}
       </div>
     </div>
@@ -92,7 +94,7 @@ function MatchSkeleton() {
   );
 }
 
-export function PicksClient() {
+export function PicksClient({ currentUserId }: { currentUserId: string }) {
   const { data: matches = [], isLoading } = api.match.getAll.useQuery(
     undefined,
     { refetchInterval: 60_000 },
@@ -180,7 +182,7 @@ export function PicksClient() {
               </p>
             )}
             {yourPicksGroups.map(({ dateStr, matches: ms }) => (
-              <DateSection key={dateStr} dateStr={dateStr} matches={ms} />
+              <DateSection key={dateStr} dateStr={dateStr} matches={ms} currentUserId={currentUserId} />
             ))}
           </>
         )}
@@ -193,7 +195,7 @@ export function PicksClient() {
           </p>
         ) : (
           upcomingGroups.map(({ dateStr, matches: ms }) => (
-            <DateSection key={dateStr} dateStr={dateStr} matches={ms} />
+            <DateSection key={dateStr} dateStr={dateStr} matches={ms} currentUserId={currentUserId} />
           ))
         )}
       </TabsContent>
