@@ -5,6 +5,7 @@ import { Geist } from "next/font/google";
 
 import { TRPCReactProvider } from "~/trpc/react";
 import { Nav } from "./_components/nav";
+import { ThemeProvider } from "./_components/theme-provider";
 
 export const metadata: Metadata = {
   title: "wc picks",
@@ -23,8 +24,10 @@ export default function RootLayout({
     <html lang="en" className={`${geist.variable}`}>
       <body>
         <TRPCReactProvider>
-          <Nav />
-          {children}
+          <ThemeProvider>
+            <Nav />
+            {children}
+          </ThemeProvider>
         </TRPCReactProvider>
       </body>
     </html>
