@@ -65,7 +65,6 @@ export function ProgressChart({ days, series }: Props) {
     return row;
   });
 
-  const tickInterval = Math.max(0, Math.floor(days.length / 6) - 1);
   const cols = legendCols(series.length);
 
   return (
@@ -76,14 +75,8 @@ export function ProgressChart({ days, series }: Props) {
         initialDimension={{ width: 600, height: 280 }}
       >
         <LineChart data={rows} margin={{ top: 8, right: 16, left: -16, bottom: 0 }}>
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis
-            dataKey="day"
-            tick={{ fontSize: 11 }}
-            tickLine={false}
-            axisLine={false}
-            interval={tickInterval}
-          />
+          <CartesianGrid vertical={false} strokeDasharray="3 3" />
+          <XAxis dataKey="day" hide />
           <YAxis
             tick={{ fontSize: 11 }}
             tickLine={false}
