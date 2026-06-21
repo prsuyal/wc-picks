@@ -59,8 +59,7 @@ export async function syncMatches(): Promise<{
     if (!dbStatus) {
       await db.match.create({ data: match });
       created++;
-    } else if (dbStatus !== "FINISHED") {
-      // Finished matches are immutable — never overwrite them
+    } else {
       await db.match.update({
         where: { externalId: match.externalId },
         data: {
