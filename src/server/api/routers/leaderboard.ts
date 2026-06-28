@@ -138,4 +138,31 @@ export const leaderboardRouter = createTRPCRouter({
 
     return { days: sortedDays, series };
   }),
+
+  getDailyBonusWinners: protectedProcedure.query(async ({ ctx }) => {
+    const predictions = await ctx.db.prediction.findMany({
+      where: { match: { round: { not: "GROUP" }, homeScore: { not: null } } },
+      include: { match: true },
+    });
+
+    const byDay = new Map<string, Map<string, number>>();
+    for (const pred of predictions) {
+      const pts = calculatePoints(pred.match, pred);
+      if (pts === null) continue;
+      const day = getLeaderboardDay(pred.match.kickoffAt);
+      let userMap = byDay.get(day);
+      if (!userMap) { userMap = new Map(); byDay.set(day, userMap); }
+      userMap.set(pred.userId, (userMap.get(pred.userId) ?? 0) + pts);
+    }
+
+    const result: Record<string, string[]> = {};
+    for (const [day, userPts] of byDay) {
+      const maxPts = Math.max(...userPts.values());
+      if (maxPts <= 0) continue;
+      result[day] = [...userPts.entries()]
+        .filter(([, pts]) => pts === maxPts)
+        .map(([userId]) => userId);
+    }
+    return result;
+  }),
 });

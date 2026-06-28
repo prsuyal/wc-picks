@@ -2,6 +2,7 @@
 
 import { useMemo } from "react";
 import { format, isToday, isTomorrow, isYesterday } from "date-fns";
+import { StarIcon } from "lucide-react";
 import { api } from "~/trpc/react";
 import { calculatePoints } from "~/lib/points";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
@@ -55,10 +56,12 @@ function DateSection({
   dateStr,
   matches,
   currentUserId,
+  isTopScorer,
 }: {
   dateStr: string;
   matches: MatchWithPrediction[];
   currentUserId: string;
+  isTopScorer?: boolean;
 }) {
   const pts = computePts(matches);
   return (
@@ -68,7 +71,8 @@ function DateSection({
           {dateLabel(dateStr)}
         </h2>
         {pts !== null && (
-          <span className="text-muted-foreground text-xs tabular-nums">
+          <span className="text-muted-foreground flex items-center gap-1 text-xs tabular-nums">
+            {isTopScorer && <StarIcon className="size-3 fill-amber-400 text-amber-400" />}
             {formatPts(pts)} pts
           </span>
         )}
@@ -99,6 +103,7 @@ export function PicksClient({ currentUserId }: { currentUserId: string }) {
     undefined,
     { refetchInterval: 60_000 },
   );
+  const { data: bonusWinners = {} } = api.leaderboard.getDailyBonusWinners.useQuery();
 
   const today = localDateStr(new Date());
 
@@ -182,7 +187,13 @@ export function PicksClient({ currentUserId }: { currentUserId: string }) {
               </p>
             )}
             {yourPicksGroups.map(({ dateStr, matches: ms }) => (
-              <DateSection key={dateStr} dateStr={dateStr} matches={ms} currentUserId={currentUserId} />
+              <DateSection
+                key={dateStr}
+                dateStr={dateStr}
+                matches={ms}
+                currentUserId={currentUserId}
+                isTopScorer={bonusWinners[dateStr]?.includes(currentUserId)}
+              />
             ))}
           </>
         )}
