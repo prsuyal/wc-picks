@@ -125,6 +125,9 @@ export function MatchCard({ match, currentUserId }: { match: MatchWithPrediction
     const isDraw = h === a;
     const effectivePen = isKnockout && isDraw ? penaltyWinnerPred : null;
 
+    // Require penalty winner selection before saving a knockout draw
+    if (isKnockout && isDraw && !penaltyWinnerPred) return;
+
     if (h === existingHome && a === existingAway && effectivePen === existingPen) return;
 
     const key = `${h}-${a}-${effectivePen ?? ""}`;
@@ -259,7 +262,7 @@ export function MatchCard({ match, currentUserId }: { match: MatchWithPrediction
                   placeholder={homeFocused ? "" : "-"}
                 />
                 {showPenPicker ? (
-                  <div className="flex items-center gap-1">
+                  <div className={`flex items-center gap-1${!penaltyWinnerPred ? " animate-pulse" : ""}`}>
                     <button
                       type="button"
                       onClick={(e) => {
@@ -268,7 +271,7 @@ export function MatchCard({ match, currentUserId }: { match: MatchWithPrediction
                       }}
                       title={`${match.homeTeam} wins on penalties`}
                       className={`text-base leading-none transition-opacity ${
-                        penaltyWinnerPred === "home" ? "opacity-100" : "opacity-25 hover:opacity-60"
+                        penaltyWinnerPred === "home" ? "opacity-100" : "opacity-50 hover:opacity-80"
                       }`}
                     >
                       {homeFlag ?? match.homeTeam[0]}
@@ -281,7 +284,7 @@ export function MatchCard({ match, currentUserId }: { match: MatchWithPrediction
                       }}
                       title={`${match.awayTeam} wins on penalties`}
                       className={`text-base leading-none transition-opacity ${
-                        penaltyWinnerPred === "away" ? "opacity-100" : "opacity-25 hover:opacity-60"
+                        penaltyWinnerPred === "away" ? "opacity-100" : "opacity-50 hover:opacity-80"
                       }`}
                     >
                       {awayFlag ?? match.awayTeam[0]}
