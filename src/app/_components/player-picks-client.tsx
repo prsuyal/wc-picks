@@ -55,24 +55,25 @@ function DateSection({
   dateStr,
   matches,
   currentUserId,
-  isTopScorer,
+  dailyBonus,
 }: {
   dateStr: string;
   matches: MatchWithPrediction[];
   currentUserId: string;
-  isTopScorer?: boolean;
+  dailyBonus?: number;
 }) {
   const pts = computePts(matches);
+  const total = pts !== null ? pts + (dailyBonus ?? 0) : null;
   return (
     <div>
       <div className="mb-2 flex items-center justify-between">
         <h2 className="text-muted-foreground text-xs font-medium tracking-widest uppercase">
           {dateLabel(dateStr)}
         </h2>
-        {pts !== null && (
+        {total !== null && (
           <span className="text-muted-foreground flex items-center gap-1 text-xs tabular-nums">
-            {isTopScorer && <StarIcon className="size-3 fill-amber-400 text-amber-400" />}
-            {formatPts(pts)} pts
+            {dailyBonus != null && <StarIcon className="size-3 fill-amber-400 text-amber-400" />}
+            {formatPts(total)} pts
           </span>
         )}
       </div>
@@ -115,7 +116,12 @@ export function PlayerPicksClient({ userId, currentUserId }: { userId: string; c
     return groupByDate(locked).sort((a, b) => b.dateStr.localeCompare(a.dateStr));
   }, [data]);
 
-  const totalPts = useMemo(() => computePts(groups.flatMap((g) => g.matches)), [groups]);
+  const totalPts = useMemo(() => {
+    const base = computePts(groups.flatMap((g) => g.matches));
+    const totalBonus = Object.entries(bonusWinners).reduce((sum, [, { userIds, bonus }]) =>
+      userIds.includes(userId) ? sum + bonus : sum, 0);
+    return base !== null ? base + totalBonus : null;
+  }, [groups, bonusWinners, userId]);
 
   function handleUpcomingClick() {
     setTab("upcoming");
@@ -172,15 +178,19 @@ export function PlayerPicksClient({ userId, currentUserId }: { userId: string; c
                 pts total
               </p>
             )}
-            {groups.map(({ dateStr, matches }) => (
-              <DateSection
-                key={dateStr}
-                dateStr={dateStr}
-                matches={matches}
-                currentUserId={currentUserId}
-                isTopScorer={bonusWinners[dateStr]?.includes(userId)}
-              />
-            ))}
+            {groups.map(({ dateStr, matches }) => {
+              const winner = bonusWinners[dateStr];
+              const dailyBonus = winner?.userIds.includes(userId) ? winner.bonus : undefined;
+              return (
+                <DateSection
+                  key={dateStr}
+                  dateStr={dateStr}
+                  matches={matches}
+                  currentUserId={currentUserId}
+                  dailyBonus={dailyBonus}
+                />
+              );
+            })}
           </>
         )}
       </TabsContent>

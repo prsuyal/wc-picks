@@ -155,13 +155,20 @@ export const leaderboardRouter = createTRPCRouter({
       userMap.set(pred.userId, (userMap.get(pred.userId) ?? 0) + pts);
     }
 
-    const result: Record<string, string[]> = {};
+    const result: Record<string, { userIds: string[]; bonus: number }> = {};
     for (const [day, userPts] of byDay) {
       const maxPts = Math.max(...userPts.values());
       if (maxPts <= 0) continue;
-      result[day] = [...userPts.entries()]
-        .filter(([, pts]) => pts === maxPts)
-        .map(([userId]) => userId);
+      const dayPreds = predictions.filter(
+        (p) => getLeaderboardDay(p.match.kickoffAt) === day,
+      );
+      const maxMultiplier = Math.max(...dayPreds.map((p) => getMultiplier(p.match.round)));
+      result[day] = {
+        userIds: [...userPts.entries()]
+          .filter(([, pts]) => pts === maxPts)
+          .map(([userId]) => userId),
+        bonus: maxMultiplier,
+      };
     }
     return result;
   }),

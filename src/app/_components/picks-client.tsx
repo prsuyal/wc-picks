@@ -56,24 +56,25 @@ function DateSection({
   dateStr,
   matches,
   currentUserId,
-  isTopScorer,
+  dailyBonus,
 }: {
   dateStr: string;
   matches: MatchWithPrediction[];
   currentUserId: string;
-  isTopScorer?: boolean;
+  dailyBonus?: number;
 }) {
   const pts = computePts(matches);
+  const total = pts !== null ? pts + (dailyBonus ?? 0) : null;
   return (
     <div>
       <div className="mb-2 flex items-center justify-between">
         <h2 className="text-muted-foreground text-xs font-medium tracking-widest uppercase">
           {dateLabel(dateStr)}
         </h2>
-        {pts !== null && (
+        {total !== null && (
           <span className="text-muted-foreground flex items-center gap-1 text-xs tabular-nums">
-            {isTopScorer && <StarIcon className="size-3 fill-amber-400 text-amber-400" />}
-            {formatPts(pts)} pts
+            {dailyBonus != null && <StarIcon className="size-3 fill-amber-400 text-amber-400" />}
+            {formatPts(total)} pts
           </span>
         )}
       </div>
@@ -139,10 +140,13 @@ export function PicksClient({ currentUserId }: { currentUserId: string }) {
       a.dateStr.localeCompare(b.dateStr),
     );
 
-    const totalPts = computePts(matches);
+    const basePts = computePts(matches);
+    const totalBonus = Object.entries(bonusWinners).reduce((sum, [, { userIds, bonus }]) =>
+      userIds.includes(currentUserId) ? sum + bonus : sum, 0);
+    const totalPts = basePts !== null ? basePts + totalBonus : null;
 
     return { yourPicksGroups: pastGroups, upcomingGroups, totalPts };
-  }, [matches, today]);
+  }, [matches, today, bonusWinners, currentUserId]);
 
   if (isLoading) {
     return (
@@ -186,15 +190,19 @@ export function PicksClient({ currentUserId }: { currentUserId: string }) {
                 pts total
               </p>
             )}
-            {yourPicksGroups.map(({ dateStr, matches: ms }) => (
-              <DateSection
-                key={dateStr}
-                dateStr={dateStr}
-                matches={ms}
-                currentUserId={currentUserId}
-                isTopScorer={bonusWinners[dateStr]?.includes(currentUserId)}
-              />
-            ))}
+            {yourPicksGroups.map(({ dateStr, matches: ms }) => {
+              const winner = bonusWinners[dateStr];
+              const dailyBonus = winner?.userIds.includes(currentUserId) ? winner.bonus : undefined;
+              return (
+                <DateSection
+                  key={dateStr}
+                  dateStr={dateStr}
+                  matches={ms}
+                  currentUserId={currentUserId}
+                  dailyBonus={dailyBonus}
+                />
+              );
+            })}
           </>
         )}
       </TabsContent>
