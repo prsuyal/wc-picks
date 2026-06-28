@@ -19,6 +19,19 @@ function formatGroupName(groupName: string) {
   return groupName.replaceAll("_", " ");
 }
 
+function getRoundLabel(round: string, groupName: string | null): string {
+  if (round === "GROUP") return groupName ? formatGroupName(groupName) : "group stage";
+  const labels: Record<string, string> = {
+    ROUND_OF_32: "round of 32",
+    ROUND_OF_16: "round of 16",
+    QUARTER_FINAL: "quarterfinals",
+    SEMI_FINAL: "semifinals",
+    THIRD_PLACE: "third place",
+    FINAL: "final",
+  };
+  return labels[round] ?? round.toLowerCase();
+}
+
 function isMatchLive(match: Match) {
   return match.kickoffAt <= new Date() && match.status !== "FINISHED";
 }
@@ -191,12 +204,8 @@ export function MatchCard({ match, currentUserId }: { match: MatchWithPrediction
               {format(new Date(match.kickoffAt), "MMM d, h:mm a")}
             </span>
             {isLateKickoff && <MoonIcon className="size-3 shrink-0 text-orange-500" />}
-            {match.groupName ? (
-              <>
-                <span>·</span>
-                <span className="truncate">{formatGroupName(match.groupName)}</span>
-              </>
-            ) : null}
+            <span>·</span>
+            <span className="truncate">{getRoundLabel(match.round, match.groupName)}</span>
             <span>·</span>
             <span className="tabular-nums">{multiplier}×</span>
           </div>
