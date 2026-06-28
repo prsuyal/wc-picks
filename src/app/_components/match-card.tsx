@@ -22,14 +22,14 @@ function formatGroupName(groupName: string) {
 function getRoundLabel(round: string, groupName: string | null): string {
   if (round === "GROUP") return groupName ? formatGroupName(groupName) : "group stage";
   const labels: Record<string, string> = {
-    ROUND_OF_32: "round of 32",
-    ROUND_OF_16: "round of 16",
-    QUARTER_FINAL: "quarterfinals",
-    SEMI_FINAL: "semifinals",
-    THIRD_PLACE: "third place",
-    FINAL: "final",
+    ROUND_OF_32: "ROUND OF 32",
+    ROUND_OF_16: "ROUND OF 16",
+    QUARTER_FINAL: "QUARTERFINALS",
+    SEMI_FINAL: "SEMIFINALS",
+    THIRD_PLACE: "THIRD PLACE",
+    FINAL: "FINAL",
   };
-  return labels[round] ?? round.toLowerCase();
+  return labels[round] ?? round.replaceAll("_", " ");
 }
 
 function isMatchLive(match: Match) {
