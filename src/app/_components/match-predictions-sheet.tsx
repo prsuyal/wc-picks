@@ -71,7 +71,11 @@ export function MatchPredictionsSheet({
                 <>
                   <span>·</span>
                   <span className="font-semibold text-foreground tabular-nums">
-                    {match.homeScore} – {match.awayScore}
+                    {match.homeScore}
+                    <span className="mx-1 text-base leading-none font-normal">
+                      {match.penaltyWinner ? (match.penaltyWinner === "home" ? homeFlag : awayFlag) : "–"}
+                    </span>
+                    {match.awayScore}
                   </span>
                 </>
               )}
@@ -118,7 +122,11 @@ export function MatchPredictionsSheet({
                       )}
                     </span>
                     <span className="shrink-0 text-sm tabular-nums text-muted-foreground">
-                      {p.homeScorePred} – {p.awayScorePred}
+                      {p.homeScorePred}
+                      <span className="mx-1 text-base leading-none">
+                        {p.penaltyWinnerPred ? (p.penaltyWinnerPred === "home" ? homeFlag : awayFlag) : "–"}
+                      </span>
+                      {p.awayScorePred}
                     </span>
                     <PointsBadge points={p.points} />
                   </div>

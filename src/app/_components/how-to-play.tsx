@@ -35,7 +35,9 @@ export function HowToPlay() {
 
           <div className="space-y-1.5 sm:space-y-2">
             <p className="font-medium text-sm">scoring</p>
-            <p className="text-muted-foreground">you <span className="text-foreground font-medium">must get the result right</span> (W/D/L) to score anything. if you do, you can earn up to 3 bonus pts on top:</p>
+            <p className="text-muted-foreground leading-relaxed">
+              you <span className="text-foreground font-medium">must get the result right</span> (W/D/L) to score anything. if you do, you can earn up to 5 bonus pts on top. in the knockout stage, all predictions are for the score <span className="text-foreground font-medium">after extra time</span>. predicting a draw means you think it goes to penalties, and you&apos;ll then have to pick the shootout winner.
+            </p>
             <div className="rounded-md border divide-y">
               <div className="flex items-center justify-between px-3 py-1.5 sm:py-2">
                 <span className="text-muted-foreground">correct result (W/D/L)</span>
@@ -53,8 +55,16 @@ export function HowToPlay() {
                 <span className="text-muted-foreground">exact goal difference</span>
                 <span className="font-medium tabular-nums">+1 pt</span>
               </div>
+              <div className="flex items-center justify-between px-3 py-1.5 sm:py-2 bg-muted/40">
+                <span className="text-muted-foreground">correct penalty shootout winner</span>
+                <span className="font-medium tabular-nums">+1 pt</span>
+              </div>
+              <div className="flex items-center justify-between px-3 py-1.5 sm:py-2 bg-muted/40">
+                <span className="text-muted-foreground">daily top scorer</span>
+                <span className="font-medium tabular-nums">+1 pt</span>
+              </div>
             </div>
-            <p className="text-muted-foreground text-xs">wrong result = 0 pts, no matter how close the scores are.</p>
+            <p className="text-muted-foreground text-xs">wrong result = 0 pts, no matter how close the scores are. all points are multiplied by the round multiplier.</p>
           </div>
 
           <div className="space-y-1.5 sm:space-y-2">

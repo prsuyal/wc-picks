@@ -65,6 +65,7 @@ export async function syncMatches(): Promise<{
         data: {
           homeScore: match.homeScore,
           awayScore: match.awayScore,
+          penaltyWinner: match.penaltyWinner,
           status: match.status,
           homeTeam: match.homeTeam,
           awayTeam: match.awayTeam,

@@ -20,6 +20,7 @@
     "start": "next start",
     "seed:picks": "tsx scripts/seed-picks.ts",
     "seed:users": "tsx scripts/seed-users.ts",
+    "seed:knockout-demo": "tsx scripts/seed-knockout-demo.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

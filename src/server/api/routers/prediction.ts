@@ -10,6 +10,7 @@ export const predictionRouter = createTRPCRouter({
         matchId: z.string(),
         homeScorePred: z.number().int().min(0),
         awayScorePred: z.number().int().min(0),
+        penaltyWinnerPred: z.enum(["home", "away"]).nullable().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -26,6 +27,11 @@ export const predictionRouter = createTRPCRouter({
         });
       }
 
+      const isDraw = input.homeScorePred === input.awayScorePred;
+      const isKnockout = match.round !== "GROUP";
+      // Only store pen winner for knockout draws; clear it otherwise
+      const penaltyWinnerPred = isKnockout && isDraw ? (input.penaltyWinnerPred ?? null) : null;
+
       return ctx.db.prediction.upsert({
         where: {
           userId_matchId: {
@@ -38,10 +44,12 @@ export const predictionRouter = createTRPCRouter({
           matchId: input.matchId,
           homeScorePred: input.homeScorePred,
           awayScorePred: input.awayScorePred,
+          penaltyWinnerPred,
         },
         update: {
           homeScorePred: input.homeScorePred,
           awayScorePred: input.awayScorePred,
+          penaltyWinnerPred,
         },
       });
     }),
@@ -85,6 +93,7 @@ export const predictionRouter = createTRPCRouter({
         userImage: p.user.image,
         homeScorePred: p.homeScorePred,
         awayScorePred: p.awayScorePred,
+        penaltyWinnerPred: p.penaltyWinnerPred,
         points: isFinished ? calculatePoints(match, p) : null,
         leaderboardPoints: totalPointsByUser.get(p.userId) ?? 0,
       }));

@@ -47,15 +47,40 @@ function mapStageToRound(stage: string): Round | null {
 
 function mapStatus(status: string): MatchStatus {
   if (status === "FINISHED" || status === "AWARDED") return "FINISHED";
-  if (status === "IN_PLAY" || status === "PAUSED" || status === "HALFTIME")
+  if (
+    status === "IN_PLAY" ||
+    status === "PAUSED" ||
+    status === "HALFTIME" ||
+    status === "EXTRA_TIME" ||
+    status === "PENALTY_SHOOTOUT"
+  )
     return "LIVE";
   return "SCHEDULED";
 }
 
-function resolveScore(match: ApiMatch): { home: number | null; away: number | null } {
+function resolveScore(match: ApiMatch): {
+  home: number | null;
+  away: number | null;
+  penaltyWinner: string | null;
+} {
   const ft = match.score.fullTime;
-  if (ft.home !== null && ft.away !== null) return { home: ft.home, away: ft.away };
-  return { home: null, away: null };
+  if (ft.home === null || ft.away === null) {
+    return { home: null, away: null, penaltyWinner: null };
+  }
+
+  // For knockout matches, add ET goals to get the after-ET score
+  const et = match.score.extraTime;
+  const home = ft.home + (et?.home ?? 0);
+  const away = ft.away + (et?.away ?? 0);
+
+  // Penalty winner: whoever scored more in the shootout
+  const pens = match.score.penalties;
+  let penaltyWinner: string | null = null;
+  if (pens && pens.home !== null && pens.away !== null) {
+    penaltyWinner = pens.home > pens.away ? "home" : "away";
+  }
+
+  return { home, away, penaltyWinner };
 }
 
 export async function fetchAllMatches() {
@@ -89,6 +114,7 @@ export async function fetchAllMatches() {
         groupName: match.group ?? null,
         homeScore: score.home,
         awayScore: score.away,
+        penaltyWinner: score.penaltyWinner,
         status: mapStatus(match.status),
       },
     ];
