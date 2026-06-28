@@ -76,7 +76,7 @@ function resolveScore(match: ApiMatch): {
   // Penalty winner: whoever scored more in the shootout
   const pens = match.score.penalties;
   let penaltyWinner: string | null = null;
-  if (pens && pens.home !== null && pens.away !== null) {
+  if (pens?.home != null && pens?.away != null) {
     penaltyWinner = pens.home > pens.away ? "home" : "away";
   }
 
