@@ -87,6 +87,7 @@ export async function fetchAllMatches() {
   const res = await fetch(`${BASE_URL}/competitions/WC/matches`, {
     headers: { "X-Auth-Token": env.FOOTBALL_DATA_API_KEY },
     next: { revalidate: 0 },
+    signal: AbortSignal.timeout(8000),
   });
 
   if (!res.ok) {
