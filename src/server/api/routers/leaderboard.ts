@@ -25,13 +25,15 @@ export const leaderboardRouter = createTRPCRouter({
         regularPoints += pts;
         predictionsWithPoints++;
 
-        const day = getLeaderboardDay(prediction.match.kickoffAt);
-        dailyEntries.push({
-          userId: user.id,
-          day,
-          pts,
-          multiplier: getMultiplier(prediction.match.round),
-        });
+        if (prediction.match.round !== "GROUP") {
+          const day = getLeaderboardDay(prediction.match.kickoffAt);
+          dailyEntries.push({
+            userId: user.id,
+            day,
+            pts,
+            multiplier: getMultiplier(prediction.match.round),
+          });
+        }
       }
 
       return { user, regularPoints, predictionsWithPoints };
@@ -100,12 +102,14 @@ export const leaderboardRouter = createTRPCRouter({
       const userMap = pointsByUserDay.get(pred.userId);
       if (userMap) userMap.set(day, (userMap.get(day) ?? 0) + pts);
 
-      dailyEntries.push({
-        userId: pred.userId,
-        day,
-        pts,
-        multiplier: getMultiplier(pred.match.round),
-      });
+      if (pred.match.round !== "GROUP") {
+        dailyEntries.push({
+          userId: pred.userId,
+          day,
+          pts,
+          multiplier: getMultiplier(pred.match.round),
+        });
+      }
     }
 
     // Daily top scorer bonuses per user per day
