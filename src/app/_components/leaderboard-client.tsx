@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
+import { ChevronLeftIcon, ChevronRightIcon, StarIcon } from "lucide-react";
 import { format } from "date-fns";
 import { api } from "~/trpc/react";
 import {
@@ -33,6 +33,7 @@ export function LeaderboardClient({ userId }: { userId: string }) {
     undefined,
     { refetchInterval: 60_000 },
   );
+  const { data: bonusWinners = {} } = api.leaderboard.getDailyBonusWinners.useQuery();
 
   const [dayIndex, setDayIndex] = useState<number | null>(null);
 
@@ -141,6 +142,9 @@ export function LeaderboardClient({ userId }: { userId: string }) {
               .toUpperCase()
               .slice(0, 2);
             const isMe = player.id === userId;
+            const isDailyTopScorer = selectedDay
+              ? bonusWinners[selectedDay]?.userIds.includes(player.id)
+              : false;
 
             return (
               <TableRow
@@ -164,12 +168,15 @@ export function LeaderboardClient({ userId }: { userId: string }) {
                         {initials}
                       </AvatarFallback>
                     </Avatar>
-                    <span className="text-sm">
+                    <span className="flex items-center gap-1 text-sm">
                       {player.name}
                       {isMe && (
-                        <span className="text-muted-foreground ml-1 text-xs">
+                        <span className="text-muted-foreground ml-0.5 text-xs">
                           (you)
                         </span>
+                      )}
+                      {isDailyTopScorer && (
+                        <StarIcon className="size-3 fill-amber-400 text-amber-400" />
                       )}
                     </span>
                   </Link>
