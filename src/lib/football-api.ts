@@ -19,9 +19,9 @@ interface ApiMatch {
   awayTeam: { name: string };
   score: {
     fullTime: ApiScore;
-    regularTime?: ApiScore;
-    extraTime?: ApiScore;
-    penalties?: ApiScore;
+    regularTime: ApiScore | null;
+    extraTime: ApiScore | null;
+    penalties: ApiScore | null;
   };
 }
 
@@ -68,11 +68,21 @@ function resolveScore(match: ApiMatch): {
     return { home: null, away: null, penaltyWinner: null };
   }
 
-  // fullTime already includes ET goals — just extract pen winner separately
   const pens = match.score.penalties;
   let penaltyWinner: string | null = null;
   if (pens?.home != null && pens?.away != null) {
     penaltyWinner = pens.home > pens.away ? "home" : "away";
+  }
+
+  // For penalty shootout matches the API stuffs pen scores into fullTime.
+  // Use extraTime (after-ET score) or regularTime (90min) instead.
+  if (penaltyWinner) {
+    const et = match.score.extraTime;
+    const rt = match.score.regularTime;
+    const s = (et?.home != null ? et : rt) ?? null;
+    if (s?.home != null && s?.away != null) {
+      return { home: s.home, away: s.away, penaltyWinner };
+    }
   }
 
   return { home: ft.home, away: ft.away, penaltyWinner };
