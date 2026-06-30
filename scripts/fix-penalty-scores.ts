@@ -44,10 +44,15 @@ async function main() {
         ? penalties.home > penalties.away ? "home" : "away"
         : null;
 
-    // For pen matches, fullTime has pen scores — use extraTime or regularTime
+    // For pen matches, fullTime has pen scores.
+    // regularTime = 90min score, extraTime = ET-period goals only.
+    // Correct after-ET score = regularTime + extraTime.
     let score: Score;
-    if (penaltyWinner) {
-      score = (extraTime?.home != null ? extraTime : regularTime) ?? fullTime;
+    if (penaltyWinner && regularTime?.home != null && regularTime?.away != null) {
+      score = {
+        home: regularTime.home + (extraTime?.home ?? 0),
+        away: regularTime.away + (extraTime?.away ?? 0),
+      };
     } else {
       score = fullTime;
     }

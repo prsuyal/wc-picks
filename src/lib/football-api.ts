@@ -74,14 +74,18 @@ function resolveScore(match: ApiMatch): {
     penaltyWinner = pens.home > pens.away ? "home" : "away";
   }
 
-  // For penalty shootout matches the API stuffs pen scores into fullTime.
-  // Use extraTime (after-ET score) or regularTime (90min) instead.
+  // For pen shootout matches the API stuffs pen scores into fullTime.
+  // regularTime = 90min score, extraTime = ET-period goals only.
+  // Add them together to get the actual after-ET score.
   if (penaltyWinner) {
-    const et = match.score.extraTime;
     const rt = match.score.regularTime;
-    const s = (et?.home != null ? et : rt) ?? null;
-    if (s?.home != null && s?.away != null) {
-      return { home: s.home, away: s.away, penaltyWinner };
+    const et = match.score.extraTime;
+    if (rt?.home != null && rt?.away != null) {
+      return {
+        home: rt.home + (et?.home ?? 0),
+        away: rt.away + (et?.away ?? 0),
+        penaltyWinner,
+      };
     }
   }
 
