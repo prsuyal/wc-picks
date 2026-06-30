@@ -141,7 +141,7 @@ export const leaderboardRouter = createTRPCRouter({
 
   getDailyBonusWinners: protectedProcedure.query(async ({ ctx }) => {
     const predictions = await ctx.db.prediction.findMany({
-      where: { match: { round: { not: "GROUP" }, homeScore: { not: null } } },
+      where: { match: { round: { not: "GROUP" }, status: "FINISHED" } },
       include: { match: true },
     });
 

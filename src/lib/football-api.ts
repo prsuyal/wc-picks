@@ -68,19 +68,14 @@ function resolveScore(match: ApiMatch): {
     return { home: null, away: null, penaltyWinner: null };
   }
 
-  // For knockout matches, add ET goals to get the after-ET score
-  const et = match.score.extraTime;
-  const home = ft.home + (et?.home ?? 0);
-  const away = ft.away + (et?.away ?? 0);
-
-  // Penalty winner: whoever scored more in the shootout
+  // fullTime already includes ET goals — just extract pen winner separately
   const pens = match.score.penalties;
   let penaltyWinner: string | null = null;
   if (pens?.home != null && pens?.away != null) {
     penaltyWinner = pens.home > pens.away ? "home" : "away";
   }
 
-  return { home, away, penaltyWinner };
+  return { home: ft.home, away: ft.away, penaltyWinner };
 }
 
 export async function fetchAllMatches() {
