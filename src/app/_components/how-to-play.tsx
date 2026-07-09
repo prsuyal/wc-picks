@@ -59,10 +59,6 @@ export function HowToPlay() {
                 <span className="text-muted-foreground">correct penalty shootout winner</span>
                 <span className="font-medium tabular-nums">+1 pt</span>
               </div>
-              <div className="flex items-center justify-between px-3 py-1.5 sm:py-2 bg-muted/40">
-                <span className="text-muted-foreground">daily top scorer</span>
-                <span className="font-medium tabular-nums">+1 pt</span>
-              </div>
             </div>
             <p className="text-muted-foreground text-xs">wrong result = 0 pts, no matter how close the scores are. all points are multiplied by the round multiplier.</p>
           </div>
