@@ -36,7 +36,7 @@ export function HowToPlay() {
           <div className="space-y-1.5 sm:space-y-2">
             <p className="font-medium text-sm">scoring</p>
             <p className="text-muted-foreground leading-relaxed">
-              you <span className="text-foreground font-medium">must get the result right</span> (W/D/L) to score anything. if you do, you can earn up to 5 bonus pts on top. in the knockout stage, all predictions are for the score <span className="text-foreground font-medium">after extra time</span>. predicting a draw means you think it goes to penalties, and you&apos;ll then have to pick the shootout winner.
+              you <span className="text-foreground font-medium">must get the result right</span> (W/D/L) to score anything. if you do, you can earn up to 4 bonus pts on top. in the knockout stage, all predictions are for the score <span className="text-foreground font-medium">after extra time</span>. predicting a draw means you think it goes to penalties, and you&apos;ll then have to pick the shootout winner.
             </p>
             <div className="rounded-md border divide-y">
               <div className="flex items-center justify-between px-3 py-1.5 sm:py-2">
