@@ -92,7 +92,6 @@ export function LeaderboardClient({ userId }: { userId: string }) {
       pts: s.totalPoints,
     }));
 
-  const today = new Date().toISOString().slice(0, 10);
   const canGoPrev = selectedIndex > 0;
   const canGoNext = selectedIndex < allDays.length - 1;
 
@@ -143,10 +142,9 @@ export function LeaderboardClient({ userId }: { userId: string }) {
               .toUpperCase()
               .slice(0, 2);
             const isMe = player.id === userId;
-            const isDailyTopScorer =
-              selectedDay &&
-              selectedDay < today &&
-              bonusWinners[selectedDay]?.userIds.includes(player.id);
+            const isDailyTopScorer = selectedDay
+              ? bonusWinners[selectedDay]?.userIds.includes(player.id)
+              : false;
 
             return (
               <TableRow
