@@ -2,6 +2,7 @@ const DAY_MS = 1000 * 60 * 60 * 24;
 
 export const LEADERBOARD_TIME_ZONE = "America/New_York";
 export const TOURNAMENT_START_DAY = "2026-06-11";
+export const TOURNAMENT_END_DAY = "2026-07-19";
 
 const leaderboardDayFormatter = new Intl.DateTimeFormat("en-US", {
   timeZone: LEADERBOARD_TIME_ZONE,
@@ -50,6 +51,7 @@ export function getLeaderboardDayNumber(day: string): number {
 export function getLeaderboardDaysThrough(
   throughDay = getLeaderboardDay(new Date()),
 ): string[] {
+  if (throughDay > TOURNAMENT_END_DAY) throughDay = TOURNAMENT_END_DAY;
   if (throughDay < TOURNAMENT_START_DAY) return [];
 
   const days: string[] = [];
